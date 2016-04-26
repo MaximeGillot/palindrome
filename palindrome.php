@@ -224,4 +224,22 @@ function CompareFastaWithTree($string , $tree ) {
 	return $result;
 } # fin de fonction CompareFastaWithTree
 
+###################################################################
+# fonction qui retourne l'abre des suffixes des palindromes commun à plusieur génome comprit dans le même fichier @path
+# @path chemin vers le fichier
+# @return arbre des suffixes
+###################################################################
+function GetCommonPalindrome($path) {
+
+	$fasta1 = fromFastaFileIntoArray($path) ;
+	$arbre = ManacherPalindromeToSuffixTree($fasta1[0]);
+
+	for ($i=1; $i < count($fasta1) ; $i++) 
+	{ 
+		$arbre = CompareFastaWithTree($fasta1[$i] , $arbre );
+	}
+	return $arbre ;
+} # fin de fonction GetCommonPalindrome
+
+
 ?>
