@@ -16,52 +16,49 @@ $new = "";
 echo $arbre-> longestSuffix("",$new);
 */
 
-########################### AFFICHE LE PLUS GRAND PALINDROME COMMUN ENTRE PLUSISUER GENOME D'UN FICHIER ####################################
-
-$timestart=microtime(true);
-$filePath = $argv[1] ;
-$fasta1 = fromFastaFileIntoArray($filePath) ;
-$arbre = ManacherPalindromeToSuffixTree($fasta1[0]);
-$timeend=microtime(true);
-$time=$timeend-$timestart;
-echo $time ;
-echo "\n";
-echo "\n";
-
-echo "\n";
-
-for ($i=1; $i < count($fasta1) ; $i++) { 
-	$timestart=microtime(true);
-
-	echo "taille de la chaine courante : " ;
-	echo strlen($fasta1[$i]);
-	echo "\n";
-	$arbre = CompareFastaWithTree($fasta1[$i] , $arbre );
-	$new = "";
-	$arbre-> longestSuffix("",$new);
-	$timeend=microtime(true);
-	$time=$timeend-$timestart;
-	echo " temps d'exe : " ;
-	echo $time ;
-	echo "\n";
-	echo " plus grand palindrome commun : ";
-	echo $new ;
-	echo "\n";
-	echo "analyse $i finit sur ";
-	echo count($fasta1);
-
-	echo "\n ";
-	echo "\n";
-	echo "\n";
-
-}
+########################### AFFICHE LEs plus grand palindome commun de l'ensenble des fichier du dossier allGenome ainsi que le plus grand palindrome spécifique ####################################
+/*
+	$arbre = GetCommonPalindrome($argv[1]);
 
 	$new = "";
 	 $arbre-> longestSuffix("",$new);
 	 echo $new ;
 	echo "\n";
 
+*/
+/*
+	$allGenomes = scandir("allGenomes/");
+	$allArbreFusionner = new node();
+	$file = fopen("resultat.csv","a+");
+	$allArbre = array();
 
+	for ($i=2; $i < count($allGenomes) ; $i++) 
+	{ 
+		echo "analyse en cours de ";
+		echo $allGenomes[$i];
+		$arbre = GetCommonPalindrome("allGenomes/".$allGenomes[$i]) ;
+		$allArbreFusionner->addTree($arbre);
+		array_push($allArbre,$arbre);
+		$new = "";
+		$arbre->longestSuffix("",$new);
+		$arraytmp = array($allGenomes[$i],"nbSequence",$new);
+		fputcsv($file,$arraytmp);
+		echo "\n";
+		echo " plus long palindrome : " ;
+		echo $new ;
+		echo "\n\n";
+	}
+
+	for ($i=0; $i < count($allArbre) ; $i++) 
+	{ 
+		echo "palindrome spécifique a ";
+		echo $allGenomes[$i+2];
+		echo " : ";
+		$new = "";
+		$allArbreFusionner->longestSuffixNotInThisTree( $allArbre[$i] , "" , $new  );
+		echo $new ;
+		echo "\n";
+	}*/
 
 ########################################################################
 /*
@@ -71,12 +68,55 @@ $arbre = ManacherPalindromeToSuffixTree($fasta1[0]);
 print_r($arbre);*/
 
 ############################TMP####################################""
-/*
-$filePath = $argv[1] ;
-$fasta1 = fromFastaFileIntoArray($filePath) ;
-$arbre = ManacherPalindromeToSuffixTree($fasta1[13]);
-$new = "";
-	$arbre-> longestSuffix("",$new);
-	echo $new ;
-*/
+/*$file = fopen("resultat.csv","a+");
+$array = array("pseudomonas","25","ACGTCG","FTF");
+fputcsv($file,$array);
+fclose($file);
+$file = fopen("resultat.csv","a+");
+$array = array("pseudomonas","25","ACGTCG","FTF");
+fputcsv($file,$array);
+fclose($file);*/
+//$arbre->addTree($arbre2);
+
+//$arbre = GetCommonPalindrome("allGenomes/".$argv[1]) ;
+//$arbre->treeToFile($argv[1],"");
+
+	$allGenomes = scandir("allGenomes/");
+	$allArbreFusionner = new node();
+	$file = fopen("resultat.csv","a+");
+
+	for ($i=2; $i < count($allGenomes) ; $i++) 
+	{ 
+		echo "analyse en cours de ";
+		echo $allGenomes[$i];
+		$arbre = GetCommonPalindrome("allGenomes/".$allGenomes[$i]) ;
+		$allArbreFusionner->addTree($arbre);
+		$arbre->treeToFile(str_replace(".fasta", "", $allGenomes[$i]),"");
+		echo "\n";
+	}
+
+	for ($i=2; $i < count($allGenomes) ; $i++) 
+	{ 
+
+		$currentArbre = new node();
+		$currentArbre->loadTreeWithFile("trees/".str_replace(".fasta", ".tree", $allGenomes[$i]));
+		echo "palindrome spécifique a ";
+		echo $allGenomes[$i];
+		echo " : ";
+		$new = "";
+		$allArbreFusionner->longestSuffixNotInThisTree( $currentArbre , "" , $new  );
+		echo $new ;
+		echo "\n";
+		$plusGrandPalindromeSpecifique = $new ;
+		$nbSequence = count(fromFastaFileIntoArray("allGenomes/".$allGenomes[$i]));
+		$new = "";
+		$currentArbre->longestSuffix("",$new);
+		$plusGrandPalindromeCommun = $new ;
+		$arraytmp = array($allGenomes[$i],$nbSequence,$plusGrandPalindromeCommun,$plusGrandPalindromeSpecifique);
+		fputcsv($file,$arraytmp);
+
+	}
+
+
+
 ?>
