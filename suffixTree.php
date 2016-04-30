@@ -256,7 +256,7 @@ class node {
         
     } #fin de methode longestSuffix
 
-    	###################################################################
+    ###################################################################
 	# fusionne l'arbre des suffixes this avec l'arbre @tree
 	# @tree un arbre des suffixes
 	# @return rien
@@ -319,6 +319,141 @@ class node {
         }
 
     } #fin de methode addTree
+
+    ###################################################################
+	# return le plus long palindrome comprit dans $tree mais pas dans $this en double
+	# @tree un arbre des suffixes
+	# @return string: le plus long suffixe
+	###################################################################
+    function longestSuffixNotInThisTree( $tree  , $current ,  &$best  ) {
+        
+       $sizelongest = strlen($best);
+
+        if (isset($tree->filsA)) 
+        {
+            if (strlen($current)+1 > $sizelongest ) {
+            	if ( $this->filsA->present == 1 && $tree->filsA->present == 1 )
+            	 {
+            		$best = $current."A";
+                	$sizelongest++;
+            	}
+                
+            }
+            $this->filsA->longestSuffixNotInThisTree($tree->filsA , $current."A" , $best );
+        }
+
+        if (isset($tree->filsC)) 
+        {
+            if (strlen($current)+1 > $sizelongest ) {
+            	if ($this->filsC->present == 1 && $tree->filsC->present == 1 )
+            	 {
+               		 $best = $current."C";
+               		 $sizelongest++;
+               	}
+            }
+            $this->filsC->longestSuffixNotInThisTree($tree->filsC , $current."C" , $best );
+        }
+
+        if (isset($tree->filsG)) 
+        {
+            if (strlen($current)+1 > $sizelongest ) {
+            	if ($this->filsG->present == 1 && $tree->filsG->present == 1 )
+            	 {
+               		 $best = $current."G";
+               		 $sizelongest++;
+            	}
+            }
+            $this->filsG->longestSuffixNotInThisTree($tree->filsG , $current."G" , $best );
+        }
+
+        if (isset($tree->filsT)) 
+        {
+            if (strlen($current)+1 > $sizelongest ) {
+            	if ($this->filsT->present == 1 && $tree->filsT->present == 1 )
+            	 {
+               		 $best = $current."T";
+                	$sizelongest++;
+                }
+            }
+            $this->filsT->longestSuffixNotInThisTree($tree->filsT , $current."T" , $best );
+        }
+
+        if (isset($tree->filsN)) 
+        {
+            if (strlen($current)+1 > $sizelongest ) {
+            	if ($this->filsN->present == 1 && $tree->filsN->present == 1 )
+            	 {
+              		$best = $current."N";
+             		$sizelongest++;
+            	}
+            }
+            $this->filsN->longestSuffixNotInThisTree($tree->filsN , $current."N" , $best );
+        }
+    } #fin de methode longestSuffixNotInThisTree
+
+    ###################################################################
+	# transforme un arbre des suffixes en fichier .tree
+	# le fichier contient un palindrome par ligne
+	# enregistre le fichier dans le dossier trees avec le nom @filename.tree
+	# mettre current à "" ;
+	###################################################################
+    function treeToFile( $fileName , $current  ) {
+
+    	if ($this->present > 0) 
+    	{
+    		$file = fopen("trees/".$fileName.".tree" , "a+");
+    		fputs($file , $current."\n");
+    		fclose($file);
+    	}
+
+        if (isset($this->filsA)) 
+        {
+            $this->filsA->treeToFile( $fileName , $current."A" );
+        }
+
+        if (isset($this->filsC)) 
+        {
+           
+            $this->filsC->treeToFile( $fileName , $current."C" );
+        }
+
+        if (isset($this->filsG)) 
+        {
+            $this->filsG->treeToFile( $fileName , $current."G" );
+        }
+
+        if (isset($this->filsT)) 
+        {
+            $this->filsT->treeToFile( $fileName , $current."T" );
+        }
+
+        if (isset($this->filsN)) 
+        {
+            $this->filsN->treeToFile( $fileName , $current."N" );
+        }
+        
+    } #fin de méthode treeToFile
+
+
+
+    ###################################################################
+	# charge un arbre des suffixe avec un fichier
+	# @path chemin vers le fichier
+	###################################################################
+    function loadTreeWithFile( $path )
+    {	
+		$handle = fopen($path , "r") or die("fichier introuvable , mauvais chemin");
+		if ($handle) 
+		{
+		    while (!feof($handle)) 
+		    {
+		        $buffer = fgets($handle, 4096);
+		        $this->makeFils(str_replace("\n", "",$buffer));
+		    }
+		    fclose($handle);
+		}
+    } #fin de méthode loadTreeWithFile
+
 }
 
 

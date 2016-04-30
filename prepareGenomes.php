@@ -10,18 +10,7 @@ function fromFastaFileIntoArray($path)
 }
 
 function fromArrayToFiles($path)
-{/*
-	$file = file_get_contents($path);
-	$array = explode(">", $file);
-	array_shift($array);
-	echo count($array);
-	for ($i=0; $i < count($array) ; $i++) {  
-		$arrayTmp = explode(" ", $array[$i]);
-		echo $arrayTmp[1];
-		echo "\n";
-		$file = fopen("allGenomes/".$arrayTmp[1].".fasta", "a+") ;
-		fputs($file,">".$array[$i]);
-	}*/
+{
 	
 	$file ="";
 	$handle = fopen($path , "r") or die("Couldn't get handle");
