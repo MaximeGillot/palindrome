@@ -135,9 +135,10 @@ function ManacherPalindromeToSuffixTree($string) {
 
 ###################################################################
 # fonction qui détermine tout les palindromes ainsi que leur position et crée un fichier csv associé
+#
 ###################################################################
-function FromFastaFileToCSVFile($string) {
-
+function FromFastaFileToCSVFile($path , $fileName) {
+	$string = readFastaFileAsString($path);
 	$string = fromFastaToManacher($string);
 	$center = 0 ;
 	$size = 2;
@@ -163,18 +164,19 @@ function FromFastaFileToCSVFile($string) {
 		 ++$center ; 
 		
 	}
-		$file = fopen("resultat.csv","a+");
 
-		foreach ($result as $key => $value) 
+	$file = fopen($fileName,"a+");
+
+	foreach ($result as $key => $value) 
+	{
+		$array = array();
+		array_push($array, $key);
+		foreach ($value as $value2) 
 		{
-			$array = array();
-			array_push($array, $key);
-			foreach ($value as $value2) 
-			{
-				array_push($array, $value2);
-			}
-			fputcsv($file,$array);
+			array_push($array, $value2);
 		}
+		fputcsv($file,$array);
+	}
 		
 
 	
