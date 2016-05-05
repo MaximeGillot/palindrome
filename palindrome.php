@@ -134,6 +134,53 @@ function ManacherPalindromeToSuffixTree($string) {
 } # fin de fonction ManacherPalindromeToSuffixTree
 
 ###################################################################
+# fonction qui détermine tout les palindromes ainsi que leur position et crée un fichier csv associé
+###################################################################
+function FromFastaFileToCSVFile($string) {
+
+	$string = fromFastaToManacher($string);
+	$center = 0 ;
+	$size = 2;
+	$result = array();
+	$sizeOfString = strlen($string) ;
+
+	while ($center < $sizeOfString ) { 
+		
+		do {
+			$current = str_replace("#","",substr($string  , $center - $size , 2*$size+1)) ; 
+			if (isPalindrome($current,5) === true ) {
+				if(!isset($result[$current]))
+				{
+					$result[$current] = array() ;
+				}
+				array_push($result[$current],  floor((($center - $size)/2)) +1 );
+				
+			}
+			$size+=2;
+		} while ( isPalindromeStrict( $current ) );
+
+		 $size = 2 ;
+		 ++$center ; 
+		
+	}
+		$file = fopen("resultat.csv","a+");
+
+		foreach ($result as $key => $value) 
+		{
+			$array = array();
+			array_push($array, $key);
+			foreach ($value as $value2) 
+			{
+				array_push($array, $value2);
+			}
+			fputcsv($file,$array);
+		}
+		
+
+	
+} # fin de fonction ManacherPalindromeToCSVFile
+
+###################################################################
 # fonction qui determine le plus grand palindrome
 # @string sequence fasta a analyser
 # @return string équivalent au plus grand palindrome
