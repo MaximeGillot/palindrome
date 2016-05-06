@@ -1,6 +1,6 @@
 <?php
 include 'palindrome.php' ;
-
+/*
 $handle = fopen($argv[1] , "r") or die("Couldn't get handle");
 if ($handle) 
 {
@@ -20,6 +20,12 @@ if ($handle)
 	    }
 	}
 	
-}
+}*/
+
+$node = new node();
+$node->loadTreeWithCSVFile($argv[1]);
+$new = "";
+$node->longestSuffix("",$new);
+echo $new ;
 
 ?>

@@ -435,9 +435,23 @@ class node {
     } #fin de méthode treeToFile
 
 
+     ###################################################################
+	# charge un arbre des suffixe a partir d'un fichier csv .pal
+	# @path chemin vers le fichier
+	###################################################################
+    function loadTreeWithCSVFile( $path )
+    {	
+		$file = fopen($path, "r");
+		while (($data = fgetcsv($file )) !== FALSE) 
+		{
+			$this->makeFils($data[0]);
+        }
+       
+    } #fin de méthode loadTreeWithFile
+
 
     ###################################################################
-	# charge un arbre des suffixe avec un fichier
+	# charge un arbre des suffixe avec un fichier .tree
 	# @path chemin vers le fichier
 	###################################################################
     function loadTreeWithFile( $path )
