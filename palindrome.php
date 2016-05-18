@@ -278,7 +278,8 @@ function CompareFastaWithTree($string , $tree ) {
 # @path chemin vers le fichier
 # @return arbre des suffixes
 ###################################################################
-function GetCommonPalindrome($path) {
+function GetCommonPalindrome($path) 
+{
 
 	$fasta1 = fromFastaFileIntoArray($path) ;
 	$arbre = ManacherPalindromeToSuffixTree($fasta1[0]);
@@ -290,5 +291,57 @@ function GetCommonPalindrome($path) {
 	return $arbre ;
 } # fin de fonction GetCommonPalindrome
 
+
+###################################################################
+# crée tous les fichier .pal des chaine fasta comprit dans le fichier $path
+# @path chemin vers le fichier qui comprend l'ensemble des chaine fasta a traiter
+# @return rien
+###################################################################
+function makeAllPalFile($path)
+{
+	$handle = fopen($path , "r") or die("Couldn't get handle");
+	if ($handle) 
+	{
+		while (!feof($handle)) 
+		{
+			$buffer = fgets($handle, 4096);
+		  	$buffer = str_replace("\n", '', $buffer);
+		  	$file_name_csv = str_replace(".fasta", '.csv', $buffer);
+		    if (!file_exists("allPalindromes/".$file_name_csv)) 
+		    {
+		    	echo "création de $file_name_csv en cours . . . \n";
+		    	FromFastaFileToCSVFile("allGenomes/".$buffer , "allPalindromes/".$file_name_csv ) ;
+		    }
+		    else
+		    {
+		    	echo " fichier ".$file_name_csv." déjà calculer \n" ;
+		    }
+		}
+	}
+} #fin de fonction makeAllPalFile
+
+###################################################################
+# fonction qui retourne l'arbre des suffixe commun des chaine fasta indiquer dans $path
+# $path chemin vers le fichier qui contient l'ensenble des chaine fasta à traiter
+# @return l'arbre des suffixes commun
+###################################################################
+function makeCommonSuffixTreeFromFile($path)
+{
+	$handle = fopen($path , "r") or die("Couldn't get handle");
+	if ($handle) 
+	{
+		$arbreDesSuffixesCommun = new node();
+		while (!feof($handle)) 
+		{
+			$buffer = fgets($handle, 4096);
+		  	$buffer = str_replace("\n", '', $buffer);
+		  	$file_name_csv = str_replace(".fasta", '.csv', $buffer);
+		    $currentTree = new node();
+			$currentTree->loadTreeWithCSVFile("allPalindromes/".$file_name_csv);
+			$arbreDesSuffixesCommun->addTree($currentTree);
+		}
+	}
+	return $arbreDesSuffixesCommun;
+}
 
 ?>

@@ -80,7 +80,7 @@ fclose($file);*/
 
 //$arbre = GetCommonPalindrome("allGenomes/".$argv[1]) ;
 //$arbre->treeToFile($argv[1],"");
-
+/*
 	$allGenomes = scandir("allGenomes/");
 	$allArbreFusionner = new node();
 	$file = fopen("resultat.csv","a+");
@@ -115,7 +115,16 @@ fclose($file);*/
 		$arraytmp = array($allGenomes[$i],$nbSequence,$plusGrandPalindromeCommun,$plusGrandPalindromeSpecifique);
 		fputcsv($file,$arraytmp);
 
-	}
+	}*/
+
+
+$url = 'eutils.ncbi.nlm.nih.gov/entrez/eutils/efetch.fcgi?db=nucleotide&id=610413304';
+$ch = curl_init($url);
+$response = curl_exec($ch);
+$json = json_decode($response, true);
+curl_close($ch);
+print_r($json);
+
 
 
 

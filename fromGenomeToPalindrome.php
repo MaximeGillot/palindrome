@@ -1,14 +1,9 @@
 <?php
 
-
-function fromFastaFileIntoArray($path) 
-{
-	$file = file_get_contents($path);
-	$array = explode(">", $file);
-	array_shift($array);
-	return $array;
-}
-
+###################################################################
+# découpe un fichier contenant des génome en plusieur sous fichier ou les génome sont réunis par groupe et les met dans le dossier allGenomes/
+# @path chemin vers le fichier
+###################################################################
 function fromArrayToFiles($path)
 {
 	
@@ -28,9 +23,12 @@ function fromArrayToFiles($path)
             }
             fclose($handle);
         }
+} #fin de fonction fromArrayToFiles
 
-}
-
+###################################################################
+# découpe un fichier contenant des génome en plusieur sous fichier qui contient une seul et unique chaine fasta
+# @path chemin vers le fichier
+###################################################################
 function fromAllGenomeToPalindromeFile($path)
 {
     
@@ -66,7 +64,7 @@ function fromAllGenomeToPalindromeFile($path)
         fclose($filleAllGenomes);
     }
 
-}
+} # fin de fonction fromAllGenomeToPalindromeFile
 
 fromAllGenomeToPalindromeFile($argv[1]);
 
