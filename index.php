@@ -2,20 +2,12 @@
 ini_set('display_errors', '1');
 error_reporting(E_ALL); 
 include 'palindrome.php' ;
-echo "ok";
+set_time_limit(100000);
 ?>
 
 <!DOCTYPE html>
 
-
-
-
-
-<p> obtenir le plus grand palindrome </p>
-
-<p> obtenir le plus grand palindrome commun </p>
-
-</html>
+<p> obtenir le plus grand palindrome d'une chaine fasta : + rajouter info NCBI </p>
 
 <?php
 
@@ -36,8 +28,16 @@ if (isset($_POST["simpleRecherche"]))
 	$longest = "";
 	$arbre->longestSuffix("",$longest);
 	echo $longest ;
+}
 
-	
+if (isset($_POST["multiRecherche"])) 
+{
+	$arbreCommun = new node();
+	$arbreCommun = makeCommonSuffixTreeFromFile($_FILES['fasta']['tmp_name']);
+	$longest = "";
+	$arbreCommun->longestSuffix("",$longest);
+	echo "le plus long palindrome commun est : " ;
+	echo $longest ;
 }
 
 $allGenomes = scandir("allGenomes/");
@@ -54,5 +54,17 @@ $allGenomes = scandir("allGenomes/");
 	echo "</select>";
 	echo " <input type=\"submit\" value=\"Rechercher\" ></code> ";
 	echo " <input type=\"hidden\" name=\"simpleRecherche\" value=\"simpleRecherche\" ></code> ";
-	echo "</form>"
+	echo "</form>" ;
+
+
+echo "<p> obtenir le plus grand palindrome commun parmit plusieur chaine fasta : </p>";
+
+echo '<form method="post" action="index.php" enctype="multipart/form-data" >
+	       <label for="fasta"> choisir un fichier </label><br />
+	       <input type="file" name="fasta" />';
+
+	echo " <input type=\"submit\" name = \"submit\" value=\"envoyer\" ></code> ";
+	echo " <input type=\"hidden\" name=\"multiRecherche\" value=\"multiRecherche\" ></code> ";
+	echo "</form>";
+
 ?>
