@@ -114,7 +114,6 @@ class node {
     * @return pas de retour, le résultat est comprit dans @a best
     * @author GillotMaxime
     */
-
     function longestSuffix($current , &$best ) 
     {
 
@@ -143,8 +142,82 @@ class node {
         }        
     } #fin de methode longestSuffix
 
+        /**
+    * @brief retourne le plus long palindrome comprit dans l'arbre des suffixes @a this avec comme valeur pair ou impaire == @a number , l'appel de la fonction se fait ainsi :
+    * $best = "";
+    * $arbre->longestSuffix( "" ,  $best );
+    *
+    * @param current mettre a "" lors de l'appel de la fonction
+    * @param best chaine de caractere passer par référence qui aura la valeur du plus grand palindrome comprit dans l'arbre des suffixes
+    * @return pas de retour, le résultat est comprit dans @a best
+    * @author GillotMaxime
+    */
+    function longestSuffixWithNumber($current , &$best , $number ) 
+    {
 
-    /**
+        $sizelongest = strlen($best);
+
+        if ($this->pair == $number ) 
+        {
+            if ( $sizelongest < strlen($current)*2 ) 
+            {
+                $best = $current.strrev($current);
+                $sizelongest = strlen($best);
+            }
+        }
+        elseif ($this->impair == $number) 
+        {
+            if ( $sizelongest < ( strlen($current)*2 ) -1 ) 
+            {
+                $best = $current.substr(strrev($current), 1 ) ;
+                $sizelongest = strlen($best);
+            }
+        }
+
+        foreach ($this->fils as $key => $value) 
+        {
+            $this->fils[$key]->longestSuffixWithNumber($current.$key , $best , $number);
+        }        
+    } #fin de methode longestSuffix
+
+        ###################################################################
+    # return le plus long palindrome comprit dans $tree mais pas dans $this en double
+    # @tree un arbre des suffixes
+    # @return string: le plus long suffixe
+    ###################################################################
+    function longestSuffixNotInThisTree( $tree  , $current ,  &$best  ) {
+        
+       $sizelongest = strlen($best);
+
+       if ($tree->pair > 0 && $this->pair == 1 ) 
+        {
+            if ( $sizelongest < strlen($current)*2 ) 
+            {
+                $best = $current.strrev($current);
+                $sizelongest = strlen($best);
+            }
+        }
+        elseif ($tree->impair > 0 && $this->impair == 1) 
+        {
+            if ( $sizelongest < ( strlen($current)*2 ) -1 ) 
+            {
+                $best = $current.substr(strrev($current), 1 ) ;
+                $sizelongest = strlen($best);
+            }
+        }
+
+       foreach ($tree->fils as $key => $value) 
+       {
+            if (isset($this->fils[$key])) 
+            {
+                $this->fils[$key]->longestSuffixNotInThisTree($tree->fils[$key] , $current.$key , $best );
+            }
+          
+       }
+
+    } #fin de methode longestSuffixNotInThisTree
+
+     /**
     * @brief ajout à @a this l'arbre des suffixes @a tree
     * @param tree l'arbre des suffixes à ajouter a @a this
     * @author GillotMaxime
@@ -172,6 +245,51 @@ class node {
         }
 
     } #fin de methode addTree
+
+    // défnie tous els valeur de $this a 0
+    function setToZero()
+    {
+        $this->pair = 0 ;
+        $this->impair = 0 ;
+        foreach ($this->fils as $key => $value)
+         {
+            $this->fils[$key]->setToZero();
+        }
+    }
+
+    function inter($tree)
+    {
+        if ($tree->pair > 0 && $this->pair > 0) 
+        {
+            $this->pair++;
+        }
+        else
+        {
+            $this->pair = 0 ;
+        }
+
+        if ($tree->impair > 0 && $this->impair > 0) 
+        {
+            $this->impair++ ;
+        }
+        else
+        {
+            $this->impair = 0 ;
+        }
+
+        foreach ($this->fils as $key => $value) 
+        {
+            if (isset($tree->fils[$key])) 
+            {
+                 $this->fils[$key]->inter($tree->fils[$key]);
+            }
+            else
+            {
+                 $this->fils[$key]->setToZero();
+            }
+        }
+    }
+
 
 
     /**

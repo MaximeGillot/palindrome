@@ -1,129 +1,147 @@
-<?php 
+<?php
+ini_set('display_errors', '1');
+error_reporting(E_ALL); 
 include 'palindrome.php' ;
+include 'ncbi.php';
+set_time_limit(100000);
 
-########################LIT UN FIchIER ET AFFICHE LE PLUS GRAND PALINDROME ###########################################
-/*
-$filePath = $argv[1] ;
-$fasta1 = readFastaFileAsString($filePath) ;
-echo ManacherBestPalindrome($fasta1);
-*/
-########################### TRANSFORME UN FICHIER EN UN ARBRE DES SUFFIXE ET AFFICHE LE PLUS GRAND PALINDROME ####################################
-/*
-$filePath = $argv[1] ;
-$fasta1 = readFastaFileAsString($filePath) ;
-$arbre = ManacherPalindromeToSuffixTree($fasta1);
-$new = "";
-echo $arbre-> longestSuffix("",$new);
-*/
 
-########################### AFFICHE LEs plus grand palindome commun de l'ensenble des fichier du dossier allGenome ainsi que le plus grand palindrome spécifique ####################################
-/*
-	$arbre = GetCommonPalindrome($argv[1]);
 
-	$new = "";
-	 $arbre-> longestSuffix("",$new);
-	 echo $new ;
+// prend en argv[1] un fichier qui contient plusieur chaine fasta, affiche le plus gran commun , le pluss grand de chaque et le plus grand spécifique .
+
+
+	$arbreCommun = new node();
+	$arbreCommun = makeInterSuffixTreeFromFile($argv[1]);
+	$longest = "";
+	$arbreCommun->longestSuffix("",$longest);
+	echo "le plus long palindrome commun est : " ;
+	echo $longest ;
 	echo "\n";
+	
+	
+	$AllArbre = new node();
+	$handle = fopen($argv[1] , "r") or die("Couldn't get handle");
+	if ($handle) 
+	{
+		$i=0;
+		while (!feof($handle)) 
+		{
+			$buffer = fgets($handle, 4096);
+		  	$buffer = str_replace("\n", '', $buffer);
+		  	if( strrchr($buffer,"/") !== FALSE )
+		  	{
+		  		$buffer = strrchr($buffer,"/");
+		  		if ($buffer[0] == "/") 
+			  	{
+			  		$buffer = substr($buffer, 1);
+			  	}
+		  	}
+		  	if (strlen($buffer) > 5 )
+		  	 {
 
-*/
-/*
-	$allGenomes = scandir("allGenomes/");
-	$allArbreFusionner = new node();
-	$file = fopen("resultat.csv","a+");
-	$allArbre = array();
+			  	$file_name_csv = str_replace(".fasta", '.csv', $buffer);
+			  	$currentTree = new node();
+				$currentTree->loadTreeWithCSVFile("allPalindromes/".$file_name_csv);
+				$AllArbre->addTree($currentTree);
+				echo "\n";
+				echo "--------------------------------------------------------------------------------------------------------\n";
+				echo "le plus long palindrome de $buffer est : " ;
+				$longest = "";
+				$currentTree->longestSuffix("",$longest);
+				echo $longest ;
+				echo "\n";
+				downloadFeaturesFromFastaFile("allGenomes/".$buffer , str_replace(".fasta","", $buffer));
+				$palindromePosition = getAllPosition("allPalindromes/".str_replace(".fasta", ".csv", $buffer),$longest);
+				for ($o=0; $o < count($palindromePosition); $o++) 
+				{ 
+					echo " information sur le palindrome a la position $palindromePosition[$o] : \n\n";
+					$info = findInformation( $palindromePosition[$o] , strlen($longest) , "ncbiFiles/".str_replace(".fasta", ".txt", $buffer));
+					if (!isset($info[0])) 
+					{
+						echo "le palindrome n'est pas situé sur une proteine";
+					}
+					for($k = 0 ; $k < count($info) ; $k++)
+					{
+						echo $info[$k]["FeatureVersion"];
+						echo "\n";
+						echo "informations sur la proteine :\n";
+						$ttmp = explode("|", $info[$k]["protein_id"]);
+						$proteineInfo = findProteinInformationFromGiId($ttmp[1]);
+						foreach ($proteineInfo as $key => $value) 
+						{
+							echo "$key : $value \n";
+						}
+					}
+				}
+				//print_r($info);
+				$i++;
+		  	}
+		}
+	}
+	echo "--------------------------------------SPECIFIQUE------------------------------------------\n";
+	
+	$handle = fopen($argv[1] , "r") or die("Couldn't get handle");
+	if ($handle) 
+	{
+		
+		while (!feof($handle)) 
+		{
+			$buffer = fgets($handle, 4096);
+		  	$buffer = str_replace("\n", '', $buffer);
+		  	if( strrchr($buffer,"/") !== FALSE )
+		  	{
+		  		$buffer = strrchr($buffer,"/");
+		  		if ($buffer[0] == "/") 
+			  	{
+			  		$buffer = substr($buffer, 1);
+			  	}
+		  	}
+		  	if (strlen($buffer) > 5 )
+		  	 {
 
-	for ($i=2; $i < count($allGenomes) ; $i++) 
-	{ 
-		echo "analyse en cours de ";
-		echo $allGenomes[$i];
-		$arbre = GetCommonPalindrome("allGenomes/".$allGenomes[$i]) ;
-		$allArbreFusionner->addTree($arbre);
-		array_push($allArbre,$arbre);
-		$new = "";
-		$arbre->longestSuffix("",$new);
-		$arraytmp = array($allGenomes[$i],"nbSequence",$new);
-		fputcsv($file,$arraytmp);
-		echo "\n";
-		echo " plus long palindrome : " ;
-		echo $new ;
-		echo "\n\n";
+			  	$file_name_csv = str_replace(".fasta", '.csv', $buffer);
+			  	$currentTree = new node();
+				$currentTree->loadTreeWithCSVFile("allPalindromes/".$file_name_csv);
+				echo "\n";
+				echo "--------------------------------------------------------------------------------------------------------\n";
+				echo "\n le plus long palindrome specifique de $file_name_csv est : ";
+				$longest = "";
+				$AllArbre->longestSuffixNotInThisTree($currentTree , "" , $longest);
+				echo $longest ;
+				echo "\n";
+				$palindromePosition = getAllPosition("allPalindromes/".str_replace(".fasta", ".csv", $buffer),$longest);
+				for ($o=0; $o < count($palindromePosition); $o++) 
+				{ 
+					echo " information sur le palindrome a la position $palindromePosition[$o] : \n\n";
+					$info = findInformation( $palindromePosition[$o] , strlen($longest) , "ncbiFiles/".str_replace(".fasta", ".txt", $buffer));
+					if (!isset($info[0])) 
+					{
+						echo "le palindrome n'est pas situé sur une proteine";
+					}
+					for($k = 0 ; $k < count($info) ; $k++)
+					{
+						echo $info[$k]["FeatureVersion"];
+						echo "\n";
+						echo "informations sur la proteine :\n";
+						$ttmp = explode("|", $info[$k]["protein_id"]);
+						$proteineInfo = findProteinInformationFromGiId($ttmp[1]);
+						foreach ($proteineInfo as $key => $value) 
+						{
+							echo "$key : $value \n";
+						}
+					}
+				}
+				
+		  	}
+		}
 	}
 
-	for ($i=0; $i < count($allArbre) ; $i++) 
-	{ 
-		echo "palindrome spécifique a ";
-		echo $allGenomes[$i+2];
-		echo " : ";
-		$new = "";
-		$allArbreFusionner->longestSuffixNotInThisTree( $allArbre[$i] , "" , $new  );
-		echo $new ;
-		echo "\n";
-	}*/
-
-########################################################################
-/*
-$filePath = $argv[1] ;
-$fasta1 = fromFastaFileIntoArray($filePath) ;
-$arbre = ManacherPalindromeToSuffixTree($fasta1[0]);
-print_r($arbre);*/
-
-############################TMP####################################""
-/*$file = fopen("resultat.csv","a+");
-$array = array("pseudomonas","25","ACGTCG","FTF");
-fputcsv($file,$array);
-fclose($file);
-$file = fopen("resultat.csv","a+");
-$array = array("pseudomonas","25","ACGTCG","FTF");
-fputcsv($file,$array);
-fclose($file);*/
-//$arbre->addTree($arbre2);
-
-//$arbre = GetCommonPalindrome("allGenomes/".$argv[1]) ;
-//$arbre->treeToFile($argv[1],"");
-/*
-	$allGenomes = scandir("allGenomes/");
-	$allArbreFusionner = new node();
-	$file = fopen("resultat.csv","a+");
-
-	for ($i=2; $i < count($allGenomes) ; $i++) 
-	{ 
-		echo "analyse en cours de ";
-		echo $allGenomes[$i];
-		$arbre = GetCommonPalindrome("allGenomes/".$allGenomes[$i]) ;
-		$allArbreFusionner->addTree($arbre);
-		$arbre->treeToFile(str_replace(".fasta", "", $allGenomes[$i]),"");
-		echo "\n";
-	}
-
-	for ($i=2; $i < count($allGenomes) ; $i++) 
-	{ 
-
-		$currentArbre = new node();
-		$currentArbre->loadTreeWithFile("trees/".str_replace(".fasta", ".tree", $allGenomes[$i]));
-		echo "palindrome spécifique a ";
-		echo $allGenomes[$i];
-		echo " : ";
-		$new = "";
-		$allArbreFusionner->longestSuffixNotInThisTree( $currentArbre , "" , $new  );
-		echo $new ;
-		echo "\n";
-		$plusGrandPalindromeSpecifique = $new ;
-		$nbSequence = count(fromFastaFileIntoArray("allGenomes/".$allGenomes[$i]));
-		$new = "";
-		$currentArbre->longestSuffix("",$new);
-		$plusGrandPalindromeCommun = $new ;
-		$arraytmp = array($allGenomes[$i],$nbSequence,$plusGrandPalindromeCommun,$plusGrandPalindromeSpecifique);
-		fputcsv($file,$arraytmp);
-
-	}*/
 
 
-$url = 'eutils.ncbi.nlm.nih.gov/entrez/eutils/efetch.fcgi?db=nucleotide&id=610413304';
-$ch = curl_init($url);
-$response = curl_exec($ch);
-$json = json_decode($response, true);
-curl_close($ch);
-print_r($json);
+
+
+
+
 
 
 

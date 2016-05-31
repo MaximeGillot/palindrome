@@ -1,5 +1,5 @@
 <?php 
-include 'suffixTree.php' ;
+include 'suffixTries.php' ;
 ###################################################################
 # fonction qui détermine si une chaine de caracter est un palindrome au sens de gilles hunault : si les lettres sont différent. AAAAAAAA n'est pas  un palindrome
 # @string chaine de caractere à tester
@@ -306,15 +306,18 @@ function makeAllPalFile($path)
 		{
 			$buffer = fgets($handle, 4096);
 		  	$buffer = str_replace("\n", '', $buffer);
+		  	if( strrchr($buffer,"/") !== FALSE )
+		  	{
+		  		$buffer = strrchr($buffer,"/");
+		  		if ($buffer[0] == "/") 
+			  	{
+			  		$buffer = substr($buffer, 1);
+			  	}
+		  	}
 		  	$file_name_csv = str_replace(".fasta", '.csv', $buffer);
 		    if (!file_exists("allPalindromes/".$file_name_csv)) 
 		    {
-		    	echo "création de $file_name_csv en cours . . . \n";
 		    	FromFastaFileToCSVFile("allGenomes/".$buffer , "allPalindromes/".$file_name_csv ) ;
-		    }
-		    else
-		    {
-		    	echo " fichier ".$file_name_csv." déjà calculer \n" ;
 		    }
 		}
 	}
@@ -322,11 +325,13 @@ function makeAllPalFile($path)
 
 ###################################################################
 # fonction qui retourne l'arbre des suffixe commun des chaine fasta indiquer dans $path
+# reconstruit les .pal si besoin
 # $path chemin vers le fichier qui contient l'ensenble des chaine fasta à traiter
 # @return l'arbre des suffixes commun
 ###################################################################
 function makeCommonSuffixTreeFromFile($path)
 {
+	makeAllPalFile($path);
 	$handle = fopen($path , "r") or die("Couldn't get handle");
 	if ($handle) 
 	{
@@ -335,6 +340,14 @@ function makeCommonSuffixTreeFromFile($path)
 		{
 			$buffer = fgets($handle, 4096);
 		  	$buffer = str_replace("\n", '', $buffer);
+		  	if( strrchr($buffer,"/") !== FALSE )
+		  	{
+		  		$buffer = strrchr($buffer,"/");
+		  		if ($buffer[0] == "/") 
+			  	{
+			  		$buffer = substr($buffer, 1);
+			  	}
+		  	}
 		  	$file_name_csv = str_replace(".fasta", '.csv', $buffer);
 		    $currentTree = new node();
 			$currentTree->loadTreeWithCSVFile("allPalindromes/".$file_name_csv);
@@ -342,6 +355,66 @@ function makeCommonSuffixTreeFromFile($path)
 		}
 	}
 	return $arbreDesSuffixesCommun;
+}
+
+function makeInterSuffixTreeFromFile($path)
+{
+	makeAllPalFile($path);
+	$handle = fopen($path , "r") or die("Couldn't get handle");
+	if ($handle) 
+	{
+		$i = 0;
+		$arbreDesSuffixesCommun = new node();
+		while (!feof($handle)) 
+		{
+			$buffer = fgets($handle, 4096);
+		  	$buffer = str_replace("\n", '', $buffer);
+		  	if( strrchr($buffer,"/") !== FALSE )
+		  	{
+		  		$buffer = strrchr($buffer,"/");
+		  		if ($buffer[0] == "/") 
+			  	{
+			  		$buffer = substr($buffer, 1);
+			  	}
+		  	}
+		  	$file_name_csv = str_replace(".fasta", '.csv', $buffer);
+		    $currentTree = new node();
+			$currentTree->loadTreeWithCSVFile("allPalindromes/".$file_name_csv);
+			if ($i == 0 ) 
+			{
+				//echo "buffer : $buffer ";
+				$arbreDesSuffixesCommun->loadTreeWithCSVFile("allPalindromes/".$file_name_csv);
+			}
+			else
+			{
+				
+				if (strlen($buffer) > 5) 
+				{
+					$arbreDesSuffixesCommun->inter($currentTree);
+				}
+				
+			}
+			$i++;
+		}
+	}
+	return $arbreDesSuffixesCommun;
+}
+
+function getAllPosition($path , $palindrome )
+{
+	$tab = array();
+	$file = fopen($path, "r");
+	while (($data = fgetcsv($file )) !== FALSE) 
+	{
+	    if ($data[0] == $palindrome) 
+	    {
+	    	for ($i=1; $i < count($data) ; $i++) 
+	    	{ 
+	    		array_push($tab, $data[$i]);
+	    	}
+	    }
+	}
+	return $tab;
 }
 
 ?>

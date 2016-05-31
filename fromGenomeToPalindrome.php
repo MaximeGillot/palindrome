@@ -44,11 +44,12 @@ function fromAllGenomeToPalindromeFile($path)
                 $arrayTmp = explode(" ", $buffer);
                 $arrayTmp2 = explode(">", $arrayTmp[0]);                
                 $nameFile = $arrayTmp[1];
-                for ($i=2; $i < count($arrayTmp)-1 ; $i++) 
+                for ($i=2; $i < count($arrayTmp) ; $i++) 
                 { 
                     $nameFile .= " ".$arrayTmp[$i];
                 }
-                $nameFile = $nameFile." ".$arrayTmp2[1].".fasta" ;
+                $nameFile = substr($nameFile, 0 , strlen($nameFile)-1);
+                $nameFile = $nameFile.".fasta" ;
                 echo $nameFile;
                 echo "\n";
                 $nameFile = mb_ereg_replace("([^\w\s\d\-_~,;\[\]\(\).])", '', $nameFile);
